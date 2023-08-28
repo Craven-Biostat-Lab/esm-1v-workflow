@@ -1,2 +1,4 @@
 # Downloaded resources
 resources
+# Models are in the container dir for docker build to see it
+container/esm_models
