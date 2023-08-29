@@ -1,26 +1,25 @@
 Bootstrap: docker
-From: pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
+From: pytorch/pytorch:{{ PYTORCH }}
+
+%arguments
+    PYTORCH=2.0.1-cuda11.7-cudnn8-runtime
 
 %files
-    ../resources/esm1v_*.pt esm_models/
-    predict.py /python_scripts/predict.py
+    esm_models/{{ MODEL }} /esm_dir/
+    predict_substitutions.py /esm_dir/predict_substitutions.py
 
 
 %post
     pip install fair-esm pandas tqdm Bio --no-warn-script-location
     
 %runscript
-    python /python_scripts/predict.py \
-        --model-location \
-            esm_models/esm1v_t33_650M_UR90S_1.pt \
-            esm_models/esm1v_t33_650M_UR90S_2.pt \
-            esm_models/esm1v_t33_650M_UR90S_3.pt \
-            esm_models/esm1v_t33_650M_UR90S_4.pt \
-            esm_models/esm1v_t33_650M_UR90S_5.pt \
+    cd /esm_dir
+    python predict_substitutions.py \
+        --model-location {{ MODEL }} \
         "$@"
 
 %labels
     Author sverchkov@wisc.edu
 
 %help
-    A container for running ESM-v1 zero-shot predictions
+    A container for running ESM-v1 zero-shot predictions of every amino acid substitution in a set of sequences
