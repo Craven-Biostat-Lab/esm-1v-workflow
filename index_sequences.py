@@ -35,6 +35,7 @@ def main():
     print(f'The longest sequence is {max(len(seq) for seq in mapping.keys())} acids long.')
     print(f'The total length of all sequences combined is {sum(len(seq) for seq in mapping.keys())} acids.')
     print(f'There are {sum(len(ids) for ids in mapping.values())} unique IDs.')
+    print(f'There are {sum(len(seq) > 1022 for seq in mapping.keys())} sequences longer than 1022.')
 
 if __name__ == "__main__":
     main()
