@@ -6,6 +6,7 @@ import gzip
 from timeit import default_timer
 
 import pandas as pd
+from tqdm import tqdm
 from Bio import SeqIO
 import torch
 from esm import pretrained
@@ -45,6 +46,14 @@ def create_parser():
         help='Output file to which to write CSV-formatted results.'
     )
 
+    parser.add_argument(
+        "--scoring-strategy",
+        type=str,
+        default="masked-marginals",
+        choices=["wt-marginals", "masked-marginals"],
+        help="Choice of scoring strategy."
+    )
+
     return parser
 
 
@@ -66,7 +75,7 @@ def chunk_sequences(seq_list):
     return chunk_list
 
 
-def run_model(model_location, chunk_list):
+def run_wt_marginals_model(model_location, chunk_list):
 
     start_time = default_timer()
     print('Loading model')
@@ -124,7 +133,84 @@ def run_model(model_location, chunk_list):
     return result
 
 
+def mask_token_tensor(token_sequence, alphabet, position):
+    result = token_sequence.clone()
+    result[0, position] = alphabet.mask_idx
+    return result
+
+def run_masked_marginals_model(model_location, chunk_list):
+
+    start_time = default_timer()
+    print('Loading model')
+
+    # Get model name
+    model_name = Path(model_location).stem if model_location.endswith('.pt') else model_location
+
+    # Load model
+    model, alphabet = pretrained.load_model_and_alphabet(model_location)
+    model.eval()
+
+    if torch.cuda.is_available():
+        model = model.cuda()
+        print("Transferred model to GPU")
+
+    print(f'It took {default_timer() - start_time} seconds to load the model.')
+
+    batch_converter = alphabet.get_batch_converter()
+
+    results = {}
+    # We'll compute one sequence at a time
+    for seq_id, seq_aas in tqdm(chunk_list):
+
+        batch_labels, batch_strs, batch_tokens = batch_converter([(seq_id, seq_aas)])
+
+        # Make masked matrix
+        tokens_masked = torch.cat([
+            mask_token_tensor(batch_tokens, alphabet, i)
+            for i in range(batch_tokens.size(1))
+        ])
+
+        if torch.cuda.is_available():
+            tokens_masked = tokens_masked.cuda()
+        
+        with torch.no_grad():
+            token_probs = torch.log_softmax(model(tokens_masked)['logits'], dim=-1)
+        
+        # The result is an S x S x V tensor of probabilities with
+        # Sequence length S
+        # Vocabulary size V
+        # On row n, the nth token is masked.
+        # The masked marginals scores of the substitutions of the nth token are
+        # given by the tensor slice at [n,n,:] minus the value at [n,n,w] where
+        # w is the vocabulary index of the original token.
+        
+        # Put results in a dataframe
+        results[seq_id] = pd.DataFrame.from_records(
+            [
+                [a, aa] + (token_probs[a+1, a+1, :] - token_probs[a+1, a+1, alphabet.get_idx(aa)]).tolist()
+                for a, aa in enumerate(seq_aas)
+            ],
+            columns=['pos', 'ref'] + alphabet.all_toks,
+            index = ['pos', 'ref']
+        )
+
+    result = pd.concat(results, names = ['chunk'])
+
+    print(f'It took {default_timer() - start_time} to generate predictions.')
+
+    result['model'] = model_name
+    result.set_index('model', append=True)
+
+    return result
+
+
 def main(args):
+
+    # Select scoring method
+    run_model = {
+        'wt-marginals': run_wt_marginals_model,
+        'masked-marginals': run_masked_marginals_model
+    }[args.scoring_strategy]
 
     # Read (possibly gzipped) fasta
     if args.sequences.suffix == '.gz':
