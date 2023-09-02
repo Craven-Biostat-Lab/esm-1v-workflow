@@ -1,3 +1,6 @@
 # Downloaded resources
 resources
 container/esm_models
+
+# Build space
+container/build
