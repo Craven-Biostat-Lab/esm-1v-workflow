@@ -1,0 +1,1 @@
+apptainer run ../container/build/model1.sif --sequences test.fasta --results result1.csv
