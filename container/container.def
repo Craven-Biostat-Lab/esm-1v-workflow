@@ -10,12 +10,12 @@ From: pytorch/pytorch:{{ PYTORCH }}
 
 
 %post
+    chmod a+r /esm_dir/*
     pip install fair-esm pandas tqdm Bio --no-warn-script-location
     
 %runscript
-    cd /esm_dir
-    python predict_substitutions.py \
-        --model-location {{ MODEL }} \
+    python /esm_dir/predict_substitutions.py \
+        --model-location /esm_dir/{{ MODEL }} \
         "$@"
 
 %labels
