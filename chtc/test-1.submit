@@ -1,0 +1,25 @@
+# HTC Submit File
+
+# Provide HTCondor with the name of the Docker container
+container_image = model1.sif
+universe = container
+
+# +WantFlocking = true
+# +WantGlideIn = true
+
+# Using container's runscript instead of an executable
+arguments = --sequences test.fasta --results result.csv
+
+transfer_input_files = test.fasta
+transfet_output_files = results.csv
+
+log = job.log
+error = job.err
+output = job.out
+
+request_cpus = 1
+request_gpus = 1
+request_memory = 8GB
+request_disk = 9GB
+
+queue
