@@ -1,7 +1,7 @@
 # HTC Submit File
 
 # Provide HTCondor with the name of the Docker container
-container_image = model1.sif
+container_image = model1v1.sif
 universe = container
 
 +WantFlocking = true # UW pools
@@ -10,7 +10,7 @@ universe = container
 # Using container's runscript instead of an executable
 arguments = --sequences test.fasta --results result.csv
 
-transfer_input_files = osdf:///chtc/staging/sverchkov/model1, test.fasta
+transfer_input_files = osdf:///chtc/staging/sverchkov/model1v1.sif, test.fasta
 transfet_output_files = test-results.csv
 
 log = test-job.log
