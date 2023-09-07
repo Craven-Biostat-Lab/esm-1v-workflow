@@ -4,22 +4,22 @@
 container_image = model1.sif
 universe = container
 
-# +WantFlocking = true
-# +WantGlideIn = true
++WantFlocking = true # UW pools
++WantGlideIn = true # OSG pool
 
 # Using container's runscript instead of an executable
 arguments = --sequences test.fasta --results result.csv
 
-transfer_input_files = test.fasta
-transfet_output_files = results.csv
+transfer_input_files = osdf:///chtc/staging/sverchkov/model1, test.fasta
+transfet_output_files = test-results.csv
 
-log = job.log
-error = job.err
-output = job.out
+log = test-job.log
+error = test-job.err
+output = test-job.out
 
 request_cpus = 1
 request_gpus = 1
-request_memory = 8GB
-request_disk = 9GB
+request_memory = 10GB
+request_disk = 10GB
 
 queue
