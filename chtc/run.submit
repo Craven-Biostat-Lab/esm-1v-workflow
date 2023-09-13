@@ -1,0 +1,40 @@
+# HTC Submit File
+
+# Custom Variables
+model = $$([ $(Step) + 1 ])
+result = $Fn(filename)_m$(model)
+
+# Don't run if output exists
+skip_if_dataflow = True
+
+# Provide HTCondor with the container
+container_image = osdf:///chtc/staging/sverchkov/model$(model)v1.sif
+universe = container
+
+# UW pools
++WantFlocking = true 
+# OSG pool
++WantGlideIn = true 
+# GPU Lab
++WantGPULab = true
++GPUJobLength = "short"
+
+# Using container's runscript instead of an executable
+arguments = --sequences $(filename) --results $(result).csv
+
+transfer_input_files = $(filename)
+transfer_output_files = $(result).csv
+
+log = run.log
+error = $(result).err
+output = $(result).out
+
+request_cpus = 1
+request_gpus = 1
+request_memory = 10GB
+request_disk = 10GB
+
+# GPU Memory
+require_gpus = (GlobalMemoryMb >= 40000)
+
+queue 5 filename matching files *.fasta
