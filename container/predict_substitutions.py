@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import gzip
 from timeit import default_timer
+from collections import defaultdict
 
 import pandas as pd
 from tqdm import tqdm
@@ -188,7 +189,7 @@ def run_masked_marginals_model(model_location, chunk_list, batch_size):
 
     batch_converter = alphabet.get_batch_converter()
 
-    results = {}
+    results = defaultdict(list)
     # We'll compute one sequence at a time
     for seq_id, seq_aas, start, end in tqdm(split_to_batches(chunk_list, batch_size)):
 
@@ -216,16 +217,16 @@ def run_masked_marginals_model(model_location, chunk_list, batch_size):
         # w is the vocabulary index of the original token.
         
         # Put results in a dataframe
-        results[seq_id] = pd.DataFrame.from_records(
+        results[seq_id].append(pd.DataFrame.from_records(
             [
                 [start + n, aa] + (token_probs[n, start + n + 1, :] - token_probs[n, start + n + 1, alphabet.get_idx(aa)]).tolist()
                 for n, aa in enumerate(seq_aas[start:end])
             ],
             columns=['pos', 'ref'] + alphabet.all_toks,
             index = ['pos', 'ref']
-        )
+        ))
 
-    result = pd.concat(results, names = ['chunk'])
+    result = pd.concat({seq_id: pd.concat(r) for seq_id, r in results.items()}, names = ['chunk'])
 
     print(f'It took {default_timer() - start_time} to generate predictions.')
 
