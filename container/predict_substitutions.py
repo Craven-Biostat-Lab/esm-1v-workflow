@@ -19,9 +19,6 @@ from esm import pretrained
 MAX_SEQ_LENTH = 1022
 SEQ_OVERLAP = 100
 
-# We (maybe) need to be careful about trying to load too much into the GPU
-MAX_BATCH_SIZE = 40
-
 def create_parser():
     parser = ArgumentParser(
         description = "Generate ESM-1v predictions for every amino acid substitution in a collection of sequences."
@@ -54,6 +51,16 @@ def create_parser():
         help="Choice of scoring strategy."
     )
 
+    parser.add_argument(
+        '--batch_size',
+        type=int,
+        default=50,
+        help=(
+            'Batch size for prediction. '
+            'If GPU memory use becomes an issue, setting this lower may help.'
+        )
+    )
+
     return parser
 
 
@@ -75,7 +82,7 @@ def chunk_sequences(seq_list):
     return chunk_list
 
 
-def run_wt_marginals_model(model_location, chunk_list):
+def run_wt_marginals_model(model_location, chunk_list, batch_size):
 
     start_time = default_timer()
     print('Loading model')
@@ -99,8 +106,8 @@ def run_wt_marginals_model(model_location, chunk_list):
     chunks_left = chunk_list
     while chunks_left:
         start_time = default_timer()
-        processed_chunks = chunks_left[:MAX_BATCH_SIZE]
-        chunks_left = chunks_left[MAX_BATCH_SIZE:]
+        processed_chunks = chunks_left[:batch_size]
+        chunks_left = chunks_left[batch_size:]
 
         batch_labels, batch_strs, batch_tokens = batch_converter(processed_chunks)
 
@@ -138,7 +145,30 @@ def mask_token_tensor(token_sequence, alphabet, position):
     result[0, position] = alphabet.mask_idx
     return result
 
-def run_masked_marginals_model(model_location, chunk_list):
+
+def split_to_batches(chunks, batch_size):
+    """Split a list of sequence chunks to batches:
+
+    Given that chunks is an iterable of tuples (id, sequence),
+    return a list of tuples (id, sequence, start, end)
+    where start and end define slice ends, i.e.
+    they are integer indeces such that end - start <= batch_size
+    and each sequence is fully covered by intervals.
+    """
+
+    result = []
+    for chunk_id, chunk_seq in chunks:
+        start = 0
+        seq_end = len(chunk_seq)
+        while start < seq_end:
+            end = min(start + batch_size, seq_end)
+            result.append((chunk_id, chunk_seq, start, end))
+            start = end
+
+    return result
+
+
+def run_masked_marginals_model(model_location, chunk_list, batch_size):
 
     start_time = default_timer()
     print('Loading model')
@@ -160,14 +190,14 @@ def run_masked_marginals_model(model_location, chunk_list):
 
     results = {}
     # We'll compute one sequence at a time
-    for seq_id, seq_aas in tqdm(chunk_list):
+    for seq_id, seq_aas, start, end in tqdm(split_to_batches(chunk_list, batch_size)):
 
         batch_labels, batch_strs, batch_tokens = batch_converter([(seq_id, seq_aas)])
 
         # Make masked matrix
         tokens_masked = torch.cat([
             mask_token_tensor(batch_tokens, alphabet, i)
-            for i in range(batch_tokens.size(1))
+            for i in range(start+1, end+1) # +1 because of the start token
         ])
 
         if torch.cuda.is_available():
@@ -224,7 +254,7 @@ def main(args):
 
     # Produce results and collate:
     pd.concat([
-        run_model(model_location, chunk_list)
+        run_model(model_location, chunk_list, args.batch_size)
         for model_location in args.model_location
     ]).to_csv(args.results)
 
