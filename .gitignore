@@ -4,3 +4,6 @@ container/esm_models
 
 # Build space
 container/build
+
+# Testing artifacts
+local-test/*.csv
