@@ -52,7 +52,7 @@ def create_parser():
     )
 
     parser.add_argument(
-        '--batch_size',
+        '--batch-size',
         type=int,
         default=50,
         help=(
