@@ -206,19 +206,20 @@ def run_masked_marginals_model(model_location, chunk_list, batch_size):
         with torch.no_grad():
             token_probs = torch.log_softmax(model(tokens_masked)['logits'], dim=-1)
         
-        # The result is an S x S x V tensor of probabilities with
+        # The result is an B x S x V tensor of probabilities with
+        # Batch size B
         # Sequence length S
         # Vocabulary size V
-        # On row n, the nth token is masked.
-        # The masked marginals scores of the substitutions of the nth token are
-        # given by the tensor slice at [n,n,:] minus the value at [n,n,w] where
+        # On row n, the (start + 1 + n)th token is masked.
+        # The masked marginals scores of the substitutions of the (start + 1 + n)th token are
+        # given by the tensor slice at [n,start + 1 + n,:] minus the value at [n,start + 1 + n,w] where
         # w is the vocabulary index of the original token.
         
         # Put results in a dataframe
         results[seq_id] = pd.DataFrame.from_records(
             [
-                [a, aa] + (token_probs[a+1, a+1, :] - token_probs[a+1, a+1, alphabet.get_idx(aa)]).tolist()
-                for a, aa in enumerate(seq_aas)
+                [start + n, aa] + (token_probs[n, start + n + 1, :] - token_probs[n, start + n + 1, alphabet.get_idx(aa)]).tolist()
+                for n, aa in enumerate(seq_aas[start:end])
             ],
             columns=['pos', 'ref'] + alphabet.all_toks,
             index = ['pos', 'ref']
