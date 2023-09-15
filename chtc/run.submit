@@ -31,8 +31,8 @@ output = $(result).out
 
 request_cpus = 1
 request_gpus = 1
-request_memory = 10GB
-request_disk = 10GB
+request_memory = 24GB
+request_disk = 12GB
 
 # GPU Memory
 require_gpus = (GlobalMemoryMb >= 40000)
