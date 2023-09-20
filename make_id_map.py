@@ -19,5 +19,6 @@ if __name__ == '__main__':
             if 'MANE' in record
             for seq in record['all']
             if '|' in seq
-        ]
+        ],
+        columns = ['MANE', 'UniProt']
     ).to_csv(mane_uniprot_csv, index=False)
