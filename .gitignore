@@ -8,3 +8,6 @@ container/build
 
 # Testing artifacts
 local-test/*.csv
+
+# Output
+results
