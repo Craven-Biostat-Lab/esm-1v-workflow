@@ -1,6 +1,7 @@
 # Downloaded resources
 resources
 container/esm_models
+chtc/proteins
 
 # Build space
 container/build
