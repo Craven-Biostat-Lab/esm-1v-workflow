@@ -44,7 +44,8 @@ def main(args):
         result_df['chunk'] = new_id + '[' + chunk_df['range']
 
         for protein in new_id.unique():
-            result_dfs[protein].append(result_df[new_id == protein])
+            if protein in mapping:
+                result_dfs[protein].append(result_df[new_id == protein])
         
     for protein, result_set in result_dfs.items():
         pd.concat(result_set, ignore_index=True).to_csv(args.output_dir / f'{protein}.csv', index=False)

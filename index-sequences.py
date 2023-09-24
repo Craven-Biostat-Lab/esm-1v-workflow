@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     refseqs_dir = Path('resources/protein-refseqs')
     uniprots_dir = Path('chtc/proteins/per-gene')
-    mane_fasta = Path('resources/MANE.GRCh38.v1.1.refseq_protein.faa.gz')
+    mane_fasta = Path('resources/MANE.GRCh38.v1.1.ensembl_protein.faa.gz')
     sequence_index_json = Path('resources/sequence_index.json')
 
     general_mapping = defaultdict(dict)
