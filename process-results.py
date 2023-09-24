@@ -19,6 +19,7 @@ from tqdm import tqdm
 
 AA_COLS = 'LAGVSERTIDPKQNFYMHWC' # This is the order of the ESM-1v vocabulary, and excluding XBUZO
 AA_NAMES = {} # TODO
+SEQ_OVERLAP = 100 # Sequence overlap for long sequences. Should match value used in prediction script.
 
 
 def create_parser():
@@ -38,20 +39,6 @@ def create_parser():
     return parser
 
 
-def load_data_and_metadata(in_path):
-    """
-    Get two dataframes indexed by our pre-defined indexing columns:
-    The "data" dataframe is all columns that are not the index columns.
-    The "metadata" dataframe is all index columns
-    """
-    index_col = ['chunk', 'pos', 'ref', 'model']
-    df = pd.read_csv(in_path)
-    data = df.set_index(index_col, drop=True)
-    metadata = df[index_col].set_index(index_col, drop=False)
-
-    return data, metadata
-
-
 def main(args):
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -66,7 +53,18 @@ def main(args):
 
     for seq, df in tqdm(working_df.groupby('seq')):
         # Reshape
-        # Compose HVGS string
+        # Predictions are in the shape of reference AA x alternate AA,
+        # end result should have one variant per row.
+        # Step 1 in reshaping: pivot longer on AAs, but wider on models
+        df.melt(
+            id_vars=['seq', 'start', 'end', 'pos', 'ref', 'model'],
+            value_vars=AA_COLS,
+            var_name='alt',
+            value_name='score',
+            ignore_index=True
+        )
+
+        # Compose HVGS string:
         # Merge overlapping estimates
         # Compute final estimate
         # Write output
