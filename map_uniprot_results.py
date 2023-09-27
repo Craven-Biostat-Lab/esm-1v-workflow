@@ -36,19 +36,33 @@ def main(args):
 
     result_dfs = defaultdict(list)
 
-    for raw_result in tqdm(args.source):
-        result_df = pd.read_csv(raw_result)
-        chunk_df = result_df['chunk'].str.split('[', expand=True, n=2)
-        chunk_df.columns = ['id', 'range']
-        new_id = chunk_df['id'].replace(mapping)
-        result_df['chunk'] = new_id + '[' + chunk_df['range']
+    files_by_id = defaultdict(list)
 
-        for protein in new_id.unique():
-            if protein in mapping:
-                result_dfs[protein].append(result_df[new_id == protein])
+    # Make id: file map
+    for raw_result in tqdm(args.source, 'Inspecting files'):
+        result_df = pd.read_csv(raw_result, usecols=['chunk'])
+        uniprot_ids = result_df['chunk'].str.split('[', expand=True, n=2)[0].unique()
+        for uniprot_id in uniprot_ids:
+            files_by_id[uniprot_id].append(raw_result)
+
+    # Write output files
+    for uniprot_id, result_files in tqdm(files_by_id.items(), 'Writing files'):
+
+        output_dfs = []
+
+        for raw_result in result_files:
+            result_df = pd.read_csv(raw_result)
+            chunk_df = result_df['chunk'].str.split('[', expand=True, n=2)
+            chunk_df.columns = ['id', 'range']
+            new_id = chunk_df['id'].replace(mapping)
+            result_df['chunk'] = new_id + '[' + chunk_df['range']
+
+            output_dfs.append(result_df[chunk_df['id'] == uniprot_id])
         
-    for protein, result_set in result_dfs.items():
-        pd.concat(result_set, ignore_index=True).to_csv(args.output_dir / f'{protein}.csv', index=False)
+        ens_id = mapping[uniprot_id] if uniprot_id in mapping.index else uniprot_id
+
+        pd.concat(output_dfs, ignore_index=True).to_csv(args.output_dir / f'{ens_id}.csv', index=False)
+
 
 if __name__ == '__main__':
     parser = create_parser()
