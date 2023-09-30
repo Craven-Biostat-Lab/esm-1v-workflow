@@ -1,0 +1,12 @@
+bundle = $$( $(Step) + 1 ])
+
+universe = vanilla
+
+executable = /ua/yuriy/.local/share/virtualenvs/esm-1v-workflow-imdDGILX/bin/python
+arguments = map_uniprot_results.py --source chtc/proteins/bundles/bundle_$(bundle)_*.csv --output-dir results/raw-mane --mapping resources/mane_uniprot.csv
+
+log = results/logs/map_proteins.log
+error = results/logs/$(bundle).out
+output = results/logs/$(bundle).err
+
+queue 367

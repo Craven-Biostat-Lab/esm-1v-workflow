@@ -8,8 +8,10 @@ in one-file-per-sequence in a separate directory.
 
 from collections import defaultdict
 from pathlib import Path
+import json
 import pandas as pd
 from tqdm import tqdm
+
 
 def create_parser():
     from argparse import ArgumentParser
@@ -21,7 +23,13 @@ def create_parser():
     )
     parser.add_argument(
         '--output-dir',
-        type=Path
+        type=Path,
+        required=False
+    )
+    parser.add_argument(
+        '--file-list',
+        type=Path,
+        required=False
     )
     parser.add_argument(
         '--mapping',
@@ -32,9 +40,6 @@ def create_parser():
 
 def main(args):
     mapping = pd.read_csv(args.mapping, index_col = ['UniProt'])['MANE']
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-
-    result_dfs = defaultdict(list)
 
     files_by_id = defaultdict(list)
 
@@ -45,23 +50,32 @@ def main(args):
         for uniprot_id in uniprot_ids:
             files_by_id[uniprot_id].append(raw_result)
 
+    if args.file_list:
+        file_list = {u: [f.as_posix() for f in l] for u, l in files_by_id.items()}
+        with args.file_list.open('wt') as out_handle:
+            json.dump(file_list, out_handle, indent=4)
+
     # Write output files
-    for uniprot_id, result_files in tqdm(files_by_id.items(), 'Writing files'):
+    if args.output_dir:
 
-        output_dfs = []
-
-        for raw_result in result_files:
-            result_df = pd.read_csv(raw_result)
-            chunk_df = result_df['chunk'].str.split('[', expand=True, n=2)
-            chunk_df.columns = ['id', 'range']
-            new_id = chunk_df['id'].replace(mapping)
-            result_df['chunk'] = new_id + '[' + chunk_df['range']
-
-            output_dfs.append(result_df[chunk_df['id'] == uniprot_id])
+        args.output_dir.mkdir(parents=True, exist_ok=True)
         
-        ens_id = mapping[uniprot_id] if uniprot_id in mapping.index else uniprot_id
+        skips = set()
 
-        pd.concat(output_dfs, ignore_index=True).to_csv(args.output_dir / f'{ens_id}.csv', index=False)
+        for uniprot_id, result_files in tqdm(files_by_id.items(), 'Writing files'):
+
+            if uniprot_id not in skips:
+                out_df = pd.concat([pd.read_csv(raw_result) for raw_result in result_files], ignore_index=True)
+            
+                chunk_df = out_df['chunk'].str.split('[', expand=True, n=2)
+                chunk_df.columns = ['id', 'range']
+                new_id = chunk_df['id'].replace(mapping)
+                out_df['chunk'] = new_id + '[' + chunk_df['range']
+
+                for e_id in new_id.unique():
+                    out_df[new_id == e_id].to_csv(args.output_dir / f'{e_id}.csv', index=False)
+                
+                skips = skips.union(chunk_df['id'].unique())
 
 
 if __name__ == '__main__':
