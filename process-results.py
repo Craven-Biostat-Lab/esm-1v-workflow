@@ -60,6 +60,10 @@ def create_parser():
     return parser
 
 
+def merge_estimates(df):
+    pass
+
+
 def main(args):
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -73,27 +77,33 @@ def main(args):
     working_df = pd.concat([index_df.drop('blank'), data_df.drop('chunk')], axis='columns')
 
     for seq, df in tqdm(working_df.groupby('seq')):
-        # Reshape
         # Predictions are in the shape of reference AA x alternate AA,
         # end result should have one variant per row.
-        # Step 1 in reshaping: pivot longer on AAs, but wider on models
-        long_df = df.melt(
-            id_vars=['seq', 'start', 'end', 'pos', 'ref', 'model'],
-            value_vars=AA_COLS,
-            var_name='alt',
-            value_name='score',
-            ignore_index=True
-        ).pivot(
-            index=['seq', 'start', 'end', 'pos', 'ref'],
-            columns='model',
-            values='score'
+        (
+            df
+            # Pivot longer on alt AAs:
+            .melt(
+                id_vars=['seq', 'start', 'end', 'pos', 'ref', 'model'],
+                value_vars=list(AA_COLS),
+                var_name='alt',
+                value_name='score',
+                ignore_index=True
+            )
+            # Compose HVGS string, i.e. {seq}:p.{ref}{pos}{alt}
+            .assign(
+                HGVS=lambda df: df.seq + ':p.' + df.ref.map(AA_NAMES) + df.pos.astype(str) + df.alt.map(AA_NAMES)
+            )
+            # Pivot wider on models
+            .pivot(
+                index=['HGVS', 'pos', 'start', 'end'],
+                columns='model',
+                values='score'
+            )
+            # Merge overlapping estimates
+            .groupby('HGVS').apply(merge_estimates)
+            # Write output
+            .to_csv(args.output_dir / f'{seq}.tsv', sep='\t')
         )
-
-        # Compose HVGS string:
-        # Merge overlapping estimates
-        # Compute final estimate
-        # Write output
-        pass
 
 
 if __name__ == '__main__':
