@@ -60,8 +60,22 @@ def create_parser():
     return parser
 
 
-def merge_estimates(df):
-    pass
+def merge_estimates(df: pd.DataFrame):
+    if df.shape[1] == 1:
+        result = df.reset_index(['pos', 'start', 'end'], drop=True)
+        result['combined_score'] = result.mean(axis='columns')
+        return result
+    elif df.shape[1] == 2:
+        sorted = df.sort_values('start')
+
+        # Merging calculation
+        overlap_start = sorted.index['end'][0]
+        overlap_end = sorted.index['start'][1]
+        pos = sorted.index['pos'][0]
+
+
+    else:
+        raise ValueError(f'Unexpected frame shape: {df.shape}; expected 1 or 2 rows. DF: {df}')
 
 
 def main(args):
