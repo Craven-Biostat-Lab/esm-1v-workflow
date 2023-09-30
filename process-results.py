@@ -18,7 +18,28 @@ from tqdm import tqdm
 
 
 AA_COLS = 'LAGVSERTIDPKQNFYMHWC' # This is the order of the ESM-1v vocabulary, and excluding XBUZO
-AA_NAMES = {} # TODO
+AA_NAMES = {
+    'A': 'Ala',
+    'R': 'Arg',
+    'N': 'Asn',
+    'D': 'Asp',
+    'C': 'Cys',
+    'Q': 'Gln',
+    'E': 'Glu',
+    'G': 'Gly',
+    'H': 'His',
+    'I': 'Ile',
+    'L': 'Leu',
+    'K': 'Lys',
+    'M': 'Met',
+    'F': 'Phe',
+    'P': 'Pro',
+    'S': 'Ser',
+    'T': 'Thr',
+    'W': 'Trp',
+    'Y': 'Tyr',
+    'V': 'Val'
+}
 SEQ_OVERLAP = 100 # Sequence overlap for long sequences. Should match value used in prediction script.
 
 
@@ -56,12 +77,16 @@ def main(args):
         # Predictions are in the shape of reference AA x alternate AA,
         # end result should have one variant per row.
         # Step 1 in reshaping: pivot longer on AAs, but wider on models
-        df.melt(
+        long_df = df.melt(
             id_vars=['seq', 'start', 'end', 'pos', 'ref', 'model'],
             value_vars=AA_COLS,
             var_name='alt',
             value_name='score',
             ignore_index=True
+        ).pivot(
+            index=['seq', 'start', 'end', 'pos', 'ref'],
+            columns='model',
+            values='score'
         )
 
         # Compose HVGS string:
