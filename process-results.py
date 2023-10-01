@@ -14,6 +14,7 @@ This accomplishes several actions:
 
 from pathlib import Path
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 
 
@@ -47,7 +48,7 @@ def create_parser():
     """Command line argument parser. This also serves as a reference."""
 
     from argparse import ArgumentParser
-    parser = ArgumentParser('Unify results from esm-1v models')
+    parser = ArgumentParser('Process results from esm-1v models')
     parser.add_argument(
         '--source',
         type=Path,
@@ -61,18 +62,48 @@ def create_parser():
 
 
 def merge_estimates(df: pd.DataFrame):
-    if df.shape[1] == 1:
+    if df.shape[0] == 1:
         result = df.reset_index(['pos', 'start', 'end'], drop=True)
         result['combined_score'] = result.mean(axis='columns')
         return result
-    elif df.shape[1] == 2:
+    elif df.shape[0] == 2:
         sorted = df.sort_values('start')
 
+        line = sorted.iloc[:,[0]].reset_index(['pos', 'start', 'end'], drop=True)
+        next_line = (
+            sorted.iloc[:,[1]]
+            .reset_index(['pos', 'start', 'end'], drop=True)
+            .rename(columns = lambda s: f'{s}_next')
+        )
+
+        result = pd.concat((line, next_line), axis='columns')
+
         # Merging calculation
+        # This uses a cosine sigmoid to smoothly transition from the leading
+        # sequence to the trailing sequence. Specifically, the score is
+        # s0 * w + s1 * (1 - w)
+        # where s0 and s1 are the means of the scores for the leading and
+        # trailing sequences respectively. For a position that is p
+        # (proportionally) into the overlap,
+        # w = { 1 for p < 0.2
+        #     { 0 for p > 0.8
+        #     { (1 + cos( pi * (p - 0.2) / 0.6 )) / 2 for p in [0.2, 0.8]
+
         overlap_start = sorted.index['end'][0]
         overlap_end = sorted.index['start'][1]
         pos = sorted.index['pos'][0]
+        relative_pos = pos - overlap_start / (overlap_end - overlap_start)
 
+        means = sorted.mean(axis='columns')
+        if relative_pos < 0.2:
+            score = means[0]
+        elif relative_pos > 0.8:
+            score = means[1]
+        else:
+            weight = (1 + np.cos(np.pi * (relative_pos - 0.2) / 0.6)) / 2
+            score = means[0] * weight + means[1] * (1-weight)
+        
+        result['combined_score'] = score
 
     else:
         raise ValueError(f'Unexpected frame shape: {df.shape}; expected 1 or 2 rows. DF: {df}')
@@ -85,10 +116,10 @@ def main(args):
     data_df = pd.concat([pd.read_csv(in_path) for in_path in args.source], ignore_index=True)
 
     # Separate out transcript and range
-    index_df = data_df.chunk.str.spit('[:]', n=4, expand=True)
+    index_df = data_df.chunk.str.split(r'[][:]', n=4, expand=True, regex=True)
     index_df.columns = 'seq', 'start', 'end', 'blank'
     
-    working_df = pd.concat([index_df.drop('blank'), data_df.drop('chunk')], axis='columns')
+    working_df = pd.concat([index_df.drop('blank', axis='columns'), data_df.drop('chunk', axis='columns')], axis='columns')
 
     for seq, df in tqdm(working_df.groupby('seq')):
         # Predictions are in the shape of reference AA x alternate AA,
