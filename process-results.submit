@@ -2,11 +2,11 @@
 
 universe = vanilla
 
-executable = /ua/yuriy/mambaforge/envs/protein-sequence-index/bin/python
-arguments = process-results.py --source $(filename) --output-dir results/processed-mane
+executable = /bin/bash
+arguments = process-results.sh $(Step)
 
 log=results/logs/process-results.log
-error=results/logs/mane-run-$Fn(filename).err
-output=results/logs/mane-run-$Fn(filename).out
+error=results/logs/missing-mane-run-$(Step).err
+output=results/logs/missing-mane-run-$(Step).out
 
-queue filename matching files results/raw-mane/batch-0/ENSP*.csv
+queue 39
