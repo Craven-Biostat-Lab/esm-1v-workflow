@@ -1,0 +1,5 @@
+name: esm-1v-processing
+dependencies:
+- python=3.10
+- pandas
+- tqdm
