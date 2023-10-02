@@ -1,0 +1,12 @@
+# HTCondor submit file
+
+universe = vanilla
+
+executable = /ua/yuriy/.local/share/virtualenvs/esm-1v-workflow-imdDGILX/bin/python
+arguments = process-results.py --source $(filename) --output-dir results/processed-mane
+
+log=results/logs/process-results.log
+error=results/logs/mane-run-$Fn(filename).err
+output=results/logs/mane-run-$Fn(filename).out
+
+queue filename matching files results/raw-mane/batch-1/ENSP*.csv
