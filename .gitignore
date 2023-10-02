@@ -11,3 +11,4 @@ local-test/*.csv
 
 # Output
 results
+results-local
