@@ -65,13 +65,13 @@ def merge_estimates(df: pd.DataFrame):
     if df.shape[0] == 1:
         result = df.reset_index(['pos', 'start', 'end'], drop=True)
         result['combined_score'] = result.mean(axis='columns')
-        return result
+
     elif df.shape[0] == 2:
         sorted = df.sort_values('start')
 
-        line = sorted.iloc[:,[0]].reset_index(['pos', 'start', 'end'], drop=True)
+        line = sorted.iloc[[0],:].reset_index(['pos', 'start', 'end'], drop=True)
         next_line = (
-            sorted.iloc[:,[1]]
+            sorted.iloc[[1],:]
             .reset_index(['pos', 'start', 'end'], drop=True)
             .rename(columns = lambda s: f'{s}_next')
         )
@@ -89,9 +89,11 @@ def merge_estimates(df: pd.DataFrame):
         #     { 0 for p > 0.8
         #     { (1 + cos( pi * (p - 0.2) / 0.6 )) / 2 for p in [0.2, 0.8]
 
-        overlap_start = sorted.index['end'][0]
-        overlap_end = sorted.index['start'][1]
-        pos = sorted.index['pos'][0]
+        index_df = sorted.index.to_frame(index=False)
+
+        overlap_start = index_df['end'][0]
+        overlap_end = index_df['start'][1]
+        pos = index_df['pos'][0]
         relative_pos = pos - overlap_start / (overlap_end - overlap_start)
 
         means = sorted.mean(axis='columns')
@@ -107,6 +109,8 @@ def merge_estimates(df: pd.DataFrame):
 
     else:
         raise ValueError(f'Unexpected frame shape: {df.shape}; expected 1 or 2 rows. DF: {df}')
+
+    return result
 
 
 def hgvs_order(ind: pd.Index):
@@ -128,7 +132,16 @@ def main(args):
     index_df = data_df.chunk.str.split(r'[][:]', n=4, expand=True, regex=True)
     index_df.columns = 'seq', 'start', 'end', 'blank'
     
-    working_df = pd.concat([index_df.drop('blank', axis='columns'), data_df.drop('chunk', axis='columns')], axis='columns')
+    working_df = pd.concat(
+        [index_df.drop('blank', axis='columns'), data_df.drop('chunk', axis='columns')],
+        axis='columns'
+    ).astype({
+        'start': int,
+        'end': int,
+        'pos': int
+    })
+    # Convert segment positions to global positions
+    working_df['pos'] = working_df['pos'] + working_df['start']
 
     for seq, df in tqdm(working_df.groupby('seq')):
         # Predictions are in the shape of reference AA x alternate AA,
