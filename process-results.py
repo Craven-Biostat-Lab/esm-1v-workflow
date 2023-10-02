@@ -58,6 +58,10 @@ def create_parser():
         '--output-dir',
         type=Path
     )
+    parser.add_argument(
+        '--overwrite',
+        action='store_true'
+    )
     return parser
 
 
@@ -144,36 +148,41 @@ def main(args):
     working_df['pos'] = working_df['pos'] + working_df['start']
 
     for seq, df in tqdm(working_df.groupby('seq')):
-        # Predictions are in the shape of reference AA x alternate AA,
-        # end result should have one variant per row.
-        (
-            df
-            # Pivot longer on alt AAs:
-            .melt(
-                id_vars=['seq', 'start', 'end', 'pos', 'ref', 'model'],
-                value_vars=list(AA_COLS),
-                var_name='alt',
-                value_name='score',
-                ignore_index=True
+
+        out_file: Path = args.output_dir / f'{seq}.tsv'
+
+        if args.overwrite or not out_file.exists():
+
+            # Predictions are in the shape of reference AA x alternate AA,
+            # end result should have one variant per row.
+            (
+                df
+                # Pivot longer on alt AAs:
+                .melt(
+                    id_vars=['seq', 'start', 'end', 'pos', 'ref', 'model'],
+                    value_vars=list(AA_COLS),
+                    var_name='alt',
+                    value_name='score',
+                    ignore_index=True
+                )
+                # Compose HVGS string, i.e. {seq}:p.{ref}{pos}{alt}
+                .assign(
+                    HGVS=lambda df: df.seq + ':p.' + df.ref.map(AA_NAMES) + df.pos.astype(str) + df.alt.map(AA_NAMES)
+                )
+                # Pivot wider on models
+                .pivot(
+                    index=['HGVS', 'pos', 'start', 'end'],
+                    columns='model',
+                    values='score'
+                )
+                # Merge overlapping estimates
+                .groupby('HGVS', group_keys=False).apply(merge_estimates)
+                # Sort nicely, i.e.
+                # by sequence ID, then position, then alternate AA
+                .sort_index(key=hgvs_order)
+                # Write output
+                .to_csv(out_file, sep='\t')
             )
-            # Compose HVGS string, i.e. {seq}:p.{ref}{pos}{alt}
-            .assign(
-                HGVS=lambda df: df.seq + ':p.' + df.ref.map(AA_NAMES) + df.pos.astype(str) + df.alt.map(AA_NAMES)
-            )
-            # Pivot wider on models
-            .pivot(
-                index=['HGVS', 'pos', 'start', 'end'],
-                columns='model',
-                values='score'
-            )
-            # Merge overlapping estimates
-            .groupby('HGVS', group_keys=False).apply(merge_estimates)
-            # Sort nicely, i.e.
-            # by sequence ID, then position, then alternate AA
-            .sort_index(key=hgvs_order)
-            # Write output
-            .to_csv(args.output_dir / f'{seq}.tsv', sep='\t')
-        )
 
 
 if __name__ == '__main__':
