@@ -109,6 +109,15 @@ def merge_estimates(df: pd.DataFrame):
         raise ValueError(f'Unexpected frame shape: {df.shape}; expected 1 or 2 rows. DF: {df}')
 
 
+def hgvs_order(ind: pd.Index):
+    """Key for ordering hgvs variants (by sequence ID, then position, then alternate AA)"""
+
+    return pd.Index([
+        (seq, int(pos), alt)
+        for seq, pos, alt in ind.str.extract(r'^([^:]+)[:]p[.][a-zA-Z]{3}(\d+)([a-zA-Z]{3})$').itertuples(index=False)
+    ])
+
+
 def main(args):
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -145,7 +154,10 @@ def main(args):
                 values='score'
             )
             # Merge overlapping estimates
-            .groupby('HGVS').apply(merge_estimates)
+            .groupby('HGVS', group_keys=False).apply(merge_estimates)
+            # Sort nicely, i.e.
+            # by sequence ID, then position, then alternate AA
+            .sort_index(key=hgvs_order)
             # Write output
             .to_csv(args.output_dir / f'{seq}.tsv', sep='\t')
         )
