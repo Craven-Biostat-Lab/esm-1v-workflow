@@ -2,11 +2,11 @@
 
 universe = vanilla
 
-executable = /ua/yuriy/.local/share/virtualenvs/esm-1v-workflow-imdDGILX/bin/python
+executable = /ua/yuriy/mambaforge/envs/protein-sequence-index/bin/python
 arguments = process-results.py --source $(filename) --output-dir results/processed-mane
 
 log=results/logs/process-results.log
 error=results/logs/mane-run-$Fn(filename).err
 output=results/logs/mane-run-$Fn(filename).out
 
-queue filename matching files results/raw-mane/batch-1/ENSP*.csv
+queue filename matching files results/raw-mane/batch-0/ENSP*.csv
