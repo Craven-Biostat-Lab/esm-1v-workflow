@@ -5,8 +5,7 @@
 iu_register.py \
     -m sandbox \
     -p prediction_set \
-    -i esm-1v-predictions.json \
-    -d
+    -i esm-1v-predictions.json
 
 # Explanation of arguments;
 # -m (mode) is either sandbox or prod (for production)
