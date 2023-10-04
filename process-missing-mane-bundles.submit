@@ -5,7 +5,7 @@ universe = vanilla
 executable = /bin/bash
 arguments = process-results.sh $(Step)
 
-log=results/logs/process-results.log
+log=results/logs/process-missing-mane-results.log
 error=results/logs/missing-mane-run-$(Step).err
 output=results/logs/missing-mane-run-$(Step).out
 
