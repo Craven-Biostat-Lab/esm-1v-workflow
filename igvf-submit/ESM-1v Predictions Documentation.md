@@ -69,4 +69,12 @@ The n-th segment of a sequence covers (0-indexed) positions $922\times(n-1)$ thr
 
 ### Combining scores
 
-**TODO**
+Every possible substitution in each segment is scored by the 5 ESM models.
+We take the average of these scores to be the score of the substitution in the segment.
+In non-overlapping regions of segments, this is also the final score (`combined_score`) we report for the substitution.
+In regions of overlap, we use a cosine sigmoid weight to combine the scores from the two overlapping segments, so that towards the beginning of the overlap we use the *prior segment*'s score, and toward the end we use the *later segment*'s score.
+Specifically:
+
+$ S_{combined} = \begin{cases} S_{prior} & p < 0.2 \\ S_{prior} w(p) + S_{later} (1-w(p)) & 0.2 \leq p \leq 0.8 \\ S_{later} & p > 0.8 \end{cases} $
+
+Where $ w(p) = \dfrac{1 + \cos \left( \frac{p - 0.2}{0.6} \pi \right)}{2} $ and *p* is the relative position of the substitution in the overlap (i.e. (substitution position - start position of overlap) / length of overlap).
