@@ -18,7 +18,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-AA_COLS = 'LAGVSERTIDPKQNFYMHWC' # This is the order of the ESM-1v vocabulary, and excluding XBUZO
+AA_COLS = 'LAGVSERTIDPKQNFYMHWCUO' # This is the order of the ESM-1v vocabulary, and excluding XBZ
 AA_NAMES = {
     'A': 'Ala',
     'R': 'Arg',
@@ -39,7 +39,9 @@ AA_NAMES = {
     'T': 'Thr',
     'W': 'Trp',
     'Y': 'Tyr',
-    'V': 'Val'
+    'V': 'Val',
+    'U': 'Sec',
+    'O': 'Pyl'
 }
 SEQ_OVERLAP = 100 # Sequence overlap for long sequences. Should match value used in prediction script.
 
@@ -153,36 +155,56 @@ def main(args):
 
         if args.overwrite or not out_file.exists():
 
-            # Predictions are in the shape of reference AA x alternate AA,
-            # end result should have one variant per row.
-            (
-                df
-                # Pivot longer on alt AAs:
-                .melt(
-                    id_vars=['seq', 'start', 'end', 'pos', 'ref', 'model'],
-                    value_vars=list(AA_COLS),
-                    var_name='alt',
-                    value_name='score',
-                    ignore_index=True
+            try:
+                # Predictions are in the shape of reference AA x alternate AA,
+                # end result should have one variant per row.
+                (
+                    df
+                    # Pivot longer on alt AAs:
+                    .melt(
+                        id_vars=['seq', 'start', 'end', 'pos', 'ref', 'model'],
+                        value_vars=list(AA_COLS),
+                        var_name='alt',
+                        value_name='score',
+                        ignore_index=True
+                    )
+                    # Compose HVGS string, i.e. {seq}:p.{ref}{pos}{alt}
+                    .assign(
+                        HGVS=lambda df: df.seq + ':p.' + df.ref.map(AA_NAMES) + df.pos.astype(str) + df.alt.map(AA_NAMES)
+                    )
+                    # Pivot wider on models
+                    .pivot(
+                        index=['HGVS', 'pos', 'start', 'end'],
+                        columns='model',
+                        values='score'
+                    )
+                    # Merge overlapping estimates
+                    .groupby('HGVS', group_keys=False).apply(merge_estimates)
+                    # Sort nicely, i.e.
+                    # by sequence ID, then position, then alternate AA
+                    .sort_index(key=hgvs_order)
+                    # Write output
+                    .to_csv(out_file, sep='\t')
                 )
-                # Compose HVGS string, i.e. {seq}:p.{ref}{pos}{alt}
-                .assign(
-                    HGVS=lambda df: df.seq + ':p.' + df.ref.map(AA_NAMES) + df.pos.astype(str) + df.alt.map(AA_NAMES)
+            except ValueError as e:
+                print(seq)
+                melted = (
+                    df
+                    # Pivot longer on alt AAs:
+                    .melt(
+                        id_vars=['seq', 'start', 'end', 'pos', 'ref', 'model'],
+                        value_vars=list(AA_COLS),
+                        var_name='alt',
+                        value_name='score',
+                        ignore_index=True
+                    )
+                    # Compose HVGS string, i.e. {seq}:p.{ref}{pos}{alt}
+                    .assign(
+                        HGVS=lambda df: df.seq + ':p.' + df.ref.map(AA_NAMES) + df.pos.astype(str) + df.alt.map(AA_NAMES)
+                    )
                 )
-                # Pivot wider on models
-                .pivot(
-                    index=['HGVS', 'pos', 'start', 'end'],
-                    columns='model',
-                    values='score'
-                )
-                # Merge overlapping estimates
-                .groupby('HGVS', group_keys=False).apply(merge_estimates)
-                # Sort nicely, i.e.
-                # by sequence ID, then position, then alternate AA
-                .sort_index(key=hgvs_order)
-                # Write output
-                .to_csv(out_file, sep='\t')
-            )
+                print(melted[melted[['HGVS', 'pos', 'start', 'end', 'model']].duplicated()])
+                raise
 
 
 if __name__ == '__main__':
