@@ -8,13 +8,13 @@ Specifically, MANE version 1.2 ([link to AA sequence FASTA file](https://ftp.ncb
 The predictions are provided as a collection of `.tsv` (tab-separated value) files, one file per unique Ensembl Peptide (ENSP) ID.
 Each file starts with a header row containing the following columns:
 * **HGVS**: A description of the AA change following the [HGVS](https://varnomen.hgvs.org/recommendations/protein/variant/substitution/) standard as closely as reasonable, specifically:
-    * Values in this column are a string of the form `{sequence}:p.{ref}{pos}{alt}`, e.g. `ENSP00000005226.7:p.Val771Ala` where
+    * Values in this column are a string of the form `{sequence}:p.{ref}{pos}{alt}`, e.g. `ENSP00000005226.7:p.Val772Ala` where
         * `{sequence}` is the ENSP ID of the protein (e.g. `ENSP00000005226.7`).
         * `{ref}` is the three-letter abbreviation of the AA that appears in the reference sequence at the substitution position (e.g. `Val`).
-        * `{pos}` is the zero-indexed substitution position as an integer (e.g. `771`).
+        * `{pos}` is the one-indexed substitution position as an integer (e.g. `772`).
         * `{alt}` is the three-letter abbreviation of the substituting AA (e.g. `Ala`).
     * Contrary to HGVS recommendation, these variants are not described at the DNA level. These are in-silico predictions of protein stability that depend solely on AA sequences and are agnostic of DNA and other context.
-    * The HGVS recommendation for predicted consequences is to use parentheses notation (e.g. ` `), we do not do this because the amino acid substitutions are neither predicted, nor are they consequences of anything, nor are they observed.
+    * The HGVS recommendation for predicted consequences is to use parentheses notation (e.g. `ENSP00000005226.7:p.(Val772Ala)`), we do not do this because the amino acid substitutions are neither predicted, nor are they consequences of anything, nor are they observed.
 * **esm1v_t33_650M_UR90S_1**: the masked-marginals score for the substitution yielded by the esm1v_t33_650M_UR90S_1 model. If this position is an overlap between two segments of a long sequence, then this is the score for the *prior segment* (see "Long sequences" subsection below for details).
 * **esm1v_t33_650M_UR90S_2**: (prior segment) masked-marginals score by esm1v_t33_650M_UR90S_2.
 * **esm1v_t33_650M_UR90S_3**: (prior segment) masked-marginals score by esm1v_t33_650M_UR90S_3.
@@ -65,7 +65,7 @@ The example above shows how a protein composed of a sequence of 41 AAs would be 
 
 In reality, we segment proteins into segments of at most 1022 AAs with an overlap of 100 AAs.
 In a region of overlap, we call the segment that ends with the overlap the *prior segment*, and the region that begins with the overlap the *later segment*.
-The n-th segment of a sequence covers (0-indexed) positions $922\times(n-1)$ through $922\times(n-1) + 1021$ of the full sequence.
+The n-th segment of a sequence covers (1-indexed) positions $922\times(n-1)+1$ through $922\times(n-1) + 1022$ of the full sequence.
 
 ### Combining scores
 

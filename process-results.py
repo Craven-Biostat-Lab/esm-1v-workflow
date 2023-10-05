@@ -170,7 +170,7 @@ def main(args):
                     )
                     # Compose HVGS string, i.e. {seq}:p.{ref}{pos}{alt}
                     .assign(
-                        HGVS=lambda df: df.seq + ':p.' + df.ref.map(AA_NAMES) + df.pos.astype(str) + df.alt.map(AA_NAMES)
+                        HGVS=lambda df: df.seq + ':p.' + df.ref.map(AA_NAMES) + (df.pos + 1).astype(str) + df.alt.map(AA_NAMES)
                     )
                     # Pivot wider on models
                     .pivot(
@@ -200,7 +200,7 @@ def main(args):
                     )
                     # Compose HVGS string, i.e. {seq}:p.{ref}{pos}{alt}
                     .assign(
-                        HGVS=lambda df: df.seq + ':p.' + df.ref.map(AA_NAMES) + df.pos.astype(str) + df.alt.map(AA_NAMES)
+                        HGVS=lambda df: df.seq + ':p.' + df.ref.map(AA_NAMES) + (df.pos + 1).astype(str) + df.alt.map(AA_NAMES)
                     )
                 )
                 print(melted[melted[['HGVS', 'pos', 'start', 'end', 'model']].duplicated()])
