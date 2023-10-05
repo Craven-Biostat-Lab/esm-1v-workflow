@@ -3,7 +3,7 @@
 universe = vanilla
 
 executable = /ua/yuriy/mambaforge/envs/esm-1v-processing/bin/python
-arguments = process-results.py --source $(filename) --output-dir results/processed-mane --overwrite
+arguments = process-results.py --source $(filename) --output-dir results/processed-mane
 
 log=results/logs/process-mapped-results.log
 error=results/logs/process-mapped-$Fn(filename).err

@@ -132,7 +132,7 @@ def main(args):
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    data_df = pd.concat([pd.read_csv(in_path) for in_path in args.source], ignore_index=True)
+    data_df = pd.concat([pd.read_csv(in_path) for in_path in args.source], ignore_index=True).drop_duplicates()
 
     # Separate out transcript and range
     index_df = data_df.chunk.str.split(r'[][:]', n=4, expand=True, regex=True)
