@@ -1,18 +1,18 @@
 # ESM-1v Predictions for all AA substitutions in all MANE proteins
 
 This prediction set contains ESM-1v one-shot protein stability predictions for all amino acid (AA) substitutions in MANE proteins.
-Specifically, MANE version 1.2 ([link to AA sequence FASTA files](TODO)).
+Specifically, MANE version 1.2 ([link to AA sequence FASTA file](https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.2/MANE.GRCh38.v1.2.ensembl_protein.faa.gz)).
 
 ## File format
 
 The predictions are provided as a collection of `.tsv` (tab-separated value) files, one file per unique Ensembl Peptide (ENSP) ID.
 Each file starts with a header row containing the following columns:
 * **HGVS**: A description of the AA change following the [HGVS](https://varnomen.hgvs.org/recommendations/protein/variant/substitution/) standard as closely as reasonable, specifically:
-    * Values in this column are a string of the form `{sequence}:p.{ref}{pos}{alt}`, e.g. `**TODO**` where
-        * `{sequence}` is the ENSP ID of the protein.
-        * `{ref}` is the three-letter abbreviation of the AA that appears in the reference sequence at the substitution position.
-        * `{pos}` is the zero-indexed substitution position as an integer.
-        * `{alt}` is the three-letter abbreviation of the substituting AA.
+    * Values in this column are a string of the form `{sequence}:p.{ref}{pos}{alt}`, e.g. `ENSP00000005226.7:p.Val771Ala` where
+        * `{sequence}` is the ENSP ID of the protein (e.g. `ENSP00000005226.7`).
+        * `{ref}` is the three-letter abbreviation of the AA that appears in the reference sequence at the substitution position (e.g. `Val`).
+        * `{pos}` is the zero-indexed substitution position as an integer (e.g. `771`).
+        * `{alt}` is the three-letter abbreviation of the substituting AA (e.g. `Ala`).
     * Contrary to HGVS recommendation, these variants are not described at the DNA level. These are in-silico predictions of protein stability that depend solely on AA sequences and are agnostic of DNA and other context.
     * The HGVS recommendation for predicted consequences is to use parentheses notation (e.g. ` `), we do not do this because the amino acid substitutions are neither predicted, nor are they consequences of anything, nor are they observed.
 * **esm1v_t33_650M_UR90S_1**: the masked-marginals score for the substitution yielded by the esm1v_t33_650M_UR90S_1 model. If this position is an overlap between two segments of a long sequence, then this is the score for the *prior segment* (see "Long sequences" subsection below for details).
@@ -25,7 +25,7 @@ Each file starts with a header row containing the following columns:
 * **esm1v_t33_650M_UR90S_3_next**: (later segment) masked-marginals score by esm1v_t33_650M_UR90S_3.
 * **esm1v_t33_650M_UR90S_4_next**: (later segment) masked-marginals score by esm1v_t33_650M_UR90S_4.
 * **esm1v_t33_650M_UR90S_5_next**: (later segment) masked-marginals score by esm1v_t33_650M_UR90S_5.
-* **combined_score**: A combined score that represents the ultimate protein stability prediction for this set of 5 models. Outside of regions of overlap and in the first 20 positions of an overlap, this is the average of the 5 *prior segment* model scores. In the last 20 position of an overlap, this is the average of the 5 *later segment* model scores. Between the 20th and 80th position of an overlap, this is a weighted average of the two averages, governed by a cosine sigmoid (see "Long sequences" for details).
+* **combined_score**: A combined score that represents the ultimate protein stability prediction for this set of 5 models. Outside of regions of overlap and in the first 20 positions of an overlap, this is the average of the 5 *prior segment* model scores. In the last 20 position of an overlap, this is the average of the 5 *later segment* model scores. Between the 20th and 80th position of an overlap, this is a weighted average of the two averages, governed by a cosine sigmoid (see "Combining scores" for details).
 
 ## Model information
 
@@ -75,6 +75,15 @@ In non-overlapping regions of segments, this is also the final score (`combined_
 In regions of overlap, we use a cosine sigmoid weight to combine the scores from the two overlapping segments, so that towards the beginning of the overlap we use the *prior segment*'s score, and toward the end we use the *later segment*'s score.
 Specifically:
 
-$ S_{combined} = \begin{cases} S_{prior} & p < 0.2 \\ S_{prior} w(p) + S_{later} (1-w(p)) & 0.2 \leq p \leq 0.8 \\ S_{later} & p > 0.8 \end{cases} $
+$ S_{combined} = w(p) S_{prior} + (1-w(p)) S_{later} $,
 
-Where $ w(p) = \dfrac{1 + \cos \left( \frac{p - 0.2}{0.6} \pi \right)}{2} $ and *p* is the relative position of the substitution in the overlap (i.e. (substitution position - start position of overlap) / length of overlap).
+where $w(p)$ is the cosine sigmoid weight
+
+$ w(p) = \begin{cases}
+1 & p < 0.2 \\
+\dfrac{1 + \cos \left( \frac{p - 0.2}{0.6} \pi \right)}{2} & 0.2 \leq p \leq 0.8 \\
+0 & p > 0.8 \end{cases} $
+
+and
+$ p = \dfrac{\text{substitution position} - \text{start position of overlap}}{\text{length of overlap}} $
+is the relative position of the substitution in the overlap.
