@@ -2,10 +2,18 @@
 # Must be done in an environment with igvf_utils installed
 # Must have the environment variables IGVF_API_KEY and IGVF_SECRET_KEY set.
 
+# Submit documentation
 iu_register.py \
     -m sandbox \
+    -p document \
+    -i esm-1v-documentation.json
+
+# Patch the already submitted prediction set
+iu_register.py -d \
+    -m sandbox \
     -p prediction_set \
-    -i esm-1v-predictions.json
+    -i esm-1v-predictions.json \
+    --patch
 
 # Explanation of arguments;
 # -m (mode) is either sandbox or prod (for production)

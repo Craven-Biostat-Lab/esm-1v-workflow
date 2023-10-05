@@ -4,5 +4,6 @@
     "file_set_type": "protein stability",
     "aliases": ["mark-craven:esm1v-mane-predictions-v1"],
     "scope": "genome-wide",
-    "description": "ESM-1v predictions for all single amino acid substitutions in all MANE protein sequences"
+    "description": "ESM-1v predictions for all single amino acid substitutions in all MANE protein sequences",
+    "documents": ["mark-craven:esm1v-mane-predictions-documentation-v1"]
 }

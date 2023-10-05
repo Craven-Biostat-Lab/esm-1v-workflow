@@ -10,6 +10,7 @@ Each file starts with a header row.
 Columns are expected but not guaranteed to appear in the order listed here.
 Refer to the header row for an accurate ordering of columns within a particular file.
 The columns are as follows:
+
 * **HGVS**: A description of the AA change following the [HGVS](https://varnomen.hgvs.org/recommendations/protein/variant/substitution/) standard as closely as reasonable, specifically:
     * Values in this column are a string of the form `{sequence}:p.{ref}{pos}{alt}`, e.g. `ENSP00000005226.7:p.Val772Ala` where
         * `{sequence}` is the ENSP ID of the protein (e.g. `ENSP00000005226.7`).
@@ -41,14 +42,14 @@ The trained models themselves that we used to generate the one-shot predictions 
 [esm1v_t33_650M_UR90S_4](https://dl.fbaipublicfiles.com/fair-esm/models/esm1v_t33_650M_UR90S_4.pt),
 [esm1v_t33_650M_UR90S_5](https://dl.fbaipublicfiles.com/fair-esm/models/esm1v_t33_650M_UR90S_5.pt).
 
-The ESM-1v models are described in [Language models enable zero-shot prediction of the effects of mutations on protein function. (Meier et al. 2021).](https://doi.org/10.1101/2021.07.09.450648).
+The ESM-1v models are described in [Language models enable zero-shot prediction of the effects of mutations on protein function. (Meier et al. 2021)](https://doi.org/10.1101/2021.07.09.450648).
 
 ### The masked-marginals score
 
 As mentioned in Meier et al., there are several possible approaches to obtaining a score from the ESM-1v model, and the masked marginals approach was shown to be best.
 We introduce the mask token at the substitution position and compute the score by considering the probability of the substitution relative to the reference amino acid:
 
-$\log p( x_i = x_i^v | x_{-i} ) - \log p( x_i = x_i^r | x_{-i} )$
+$$ \log p( x_i = x_i^v | x_{-i} ) - \log p( x_i = x_i^r | x_{-i} ) $$
 
 Where $x^v$ and $x^r$ are the variant and reference sequences respectively, $x_{-i}$ represents the sequence $x$ with position $i$ masked, and $i$ is the substitution position.
 
@@ -83,15 +84,15 @@ In non-overlapping regions of segments, this is also the final score (`combined_
 In regions of overlap, we use a cosine sigmoid weight to combine the scores from the two overlapping segments, so that towards the beginning of the overlap we use the *prior segment*'s score, and toward the end we use the *later segment*'s score.
 Specifically:
 
-$ S_{combined} = w(p) S_{prior} + (1-w(p)) S_{later} $,
+$$ S_{combined} = w(p) S_{prior} + (1-w(p)) S_{later} $$
 
 where $w(p)$ is the cosine sigmoid weight
 
-$ w(p) = \begin{cases}
+$$ w(p) = \begin{cases}
 1 & p < 0.2 \\
 \dfrac{1 + \cos \left( \frac{p - 0.2}{0.6} \pi \right)}{2} & 0.2 \leq p \leq 0.8 \\
-0 & p > 0.8 \end{cases} $
+0 & p > 0.8 \end{cases} $$
 
 and
-$ p = \dfrac{\text{substitution position} - \text{start position of overlap}}{\text{length of overlap}} $
+$$ p = \dfrac{\text{substitution position} - \text{start position of overlap}}{\text{length of overlap}} $$
 is the relative position of the substitution in the overlap.
