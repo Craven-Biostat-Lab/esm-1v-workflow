@@ -3,7 +3,7 @@
 # Must have the environment variables IGVF_API_KEY and IGVF_SECRET_KEY set.
 
 # Submit documentation
-iu_register.py \
+iu_register.py -d \
     -m sandbox \
     -p document \
     -i esm-1v-documentation.json
@@ -14,6 +14,12 @@ iu_register.py -d \
     -p prediction_set \
     -i esm-1v-predictions.json \
     --patch
+
+# Submit files
+iu_register.py \
+    -m sandbox \
+    -p tabular_file \
+    -i esm-1v-files-metadata.txt
 
 # Explanation of arguments;
 # -m (mode) is either sandbox or prod (for production)
