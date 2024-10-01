@@ -151,7 +151,7 @@ def main(args):
 
     for seq, df in tqdm(working_df.groupby('seq')):
 
-        out_file: Path = args.output_dir / f'{seq}.tsv'
+        out_file: Path = args.output_dir / f'{seq}.tsv.gz'
 
         if args.overwrite or not out_file.exists():
 
