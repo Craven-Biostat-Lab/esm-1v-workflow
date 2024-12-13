@@ -1,0 +1,9 @@
+{
+    "lab": "mark-craven",
+    "award": "HG012039",
+    "aliases": ["mark-craven:esm1v-software"],
+    "title": "ESM-1v variant scoring workflow",
+    "name": "esm-1v-workflow",
+    "source_url": "https://github.com/Craven-Biostat-Lab/esm-1v-workflow",
+    "description": "Workflow and supporting code for evaluating every amino acid human protein substitution using ESM-1v."
+}
