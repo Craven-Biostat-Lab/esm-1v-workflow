@@ -39,7 +39,11 @@ def main():
 
     mapping_df = pd.read_table(args.mapping)
     mapping_df = mapping_df[~mapping_df['Protein stable ID version'].isna()]
-    gene_mapping = mapping_df.set_index('Protein stable ID version')['Gene stable ID version']
+    gene_mapping = (
+        mapping_df
+        .set_index('Protein stable ID version')['Gene stable ID version']
+        .str.extract(r'(ENSG[0-9]+)\.[0-9]+', expand=False)
+    )
 
     common_fields = {
         "lab": "mark-craven",
@@ -57,7 +61,9 @@ def main():
     common_fileset_fields = {
         "file_set_type": "functional effect",
         "scope": "genome-wide",
-        "documents": '["mark-craven:esm1v-mane-predictions-documentation-v1"]'
+        "documents": '["mark-craven:esm1v-mane-predictions-documentation-v1"]',
+        #"donors": '["IGVFDO5469RVDJ"]' # The "virtual human donor" in the IGVF portal
+        "donors": '["TSTDO04484973"]' # Random donor for sandbox
     }
     common_fileset_fields.update(common_fields)
 

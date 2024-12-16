@@ -3,45 +3,50 @@
         "lab": "mark-craven",
         "award": "HG012039",
         "aliases": ["mark-craven:esm1v-t33_650M_UR90S_1"],
-        "submitted_file_name": "/ua/ml-group/igvf/esm-1v-workflow/resources/esm1v_t33_650M_UR90S_1.pt",
         "content_type": "network weights",
         "file_format": "pt",
-        "file_set": "mark-craven:esm1v-model-set-v1"
+        "file_set": "mark-craven:esm1v-model-set-v1",
+        "externally_hosted": true,
+        "external_host_url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm1v_t33_650M_UR90S_1.pt"
     },
     {
         "lab": "mark-craven",
         "award": "HG012039",
         "aliases": ["mark-craven:esm1v-t33_650M_UR90S_2"],
-        "submitted_file_name": "/ua/ml-group/igvf/esm-1v-workflow/resources/esm1v_t33_650M_UR90S_2.pt",
         "content_type": "network weights",
         "file_format": "pt",
-        "file_set": "mark-craven:esm1v-model-set-v1"
+        "file_set": "mark-craven:esm1v-model-set-v1",
+        "externally_hosted": true,
+        "external_host_url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm1v_t33_650M_UR90S_2.pt"
     },
     {
         "lab": "mark-craven",
         "award": "HG012039",
         "aliases": ["mark-craven:esm1v-t33_650M_UR90S_3"],
-        "submitted_file_name": "/ua/ml-group/igvf/esm-1v-workflow/resources/esm1v_t33_650M_UR90S_3.pt",
         "content_type": "network weights",
         "file_format": "pt",
-        "file_set": "mark-craven:esm1v-model-set-v1"
+        "file_set": "mark-craven:esm1v-model-set-v1",
+        "externally_hosted": true,
+        "external_host_url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm1v_t33_650M_UR90S_3.pt"
     },
     {
         "lab": "mark-craven",
         "award": "HG012039",
         "aliases": ["mark-craven:esm1v-t33_650M_UR90S_4"],
-        "submitted_file_name": "/ua/ml-group/igvf/esm-1v-workflow/resources/esm1v_t33_650M_UR90S_4.pt",
         "content_type": "network weights",
         "file_format": "pt",
-        "file_set": "mark-craven:esm1v-model-set-v1"
+        "file_set": "mark-craven:esm1v-model-set-v1",
+        "externally_hosted": true,
+        "external_host_url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm1v_t33_650M_UR90S_4.pt"
     },
     {
         "lab": "mark-craven",
         "award": "HG012039",
         "aliases": ["mark-craven:esm1v-t33_650M_UR90S_5"],
-        "submitted_file_name": "/ua/ml-group/igvf/esm-1v-workflow/resources/esm1v_t33_650M_UR90S_5.pt",
         "content_type": "network weights",
         "file_format": "pt",
-        "file_set": "mark-craven:esm1v-model-set-v1"
+        "file_set": "mark-craven:esm1v-model-set-v1",
+        "externally_hosted": true,
+        "external_host_url": "https://dl.fbaipublicfiles.com/fair-esm/models/esm1v_t33_650M_UR90S_5.pt"
     }
 ]

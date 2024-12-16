@@ -43,7 +43,7 @@ if false; then
 fi
 
 # Submit prediction sets
-if false; then
+if true; then
     iu_register.py \
         -m sandbox \
         -p prediction_set \
