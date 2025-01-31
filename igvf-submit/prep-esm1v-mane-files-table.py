@@ -61,8 +61,8 @@ def main():
         "file_set_type": "functional effect",
         "scope": "genome-wide",
         "documents": '["mark-craven:esm1v-mane-predictions-documentation-v1"]',
-        #"donors": '["IGVFDO5469RVDJ"]' # The "virtual human donor" in the IGVF portal
-        "donors": '["TSTDO04484973"]' # Random donor for sandbox
+        "donors": '["IGVFDO5469RVDJ"]' # The "virtual human donor" in the IGVF portal
+        #"donors": '["TSTDO04484973"]' # Random donor for sandbox
     }
     common_fileset_fields.update(common_fields)
 

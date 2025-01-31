@@ -22,3 +22,7 @@ The predictions are organized in prediction sets grouped by gene.
     - Links to this repository.
     - References commit ID.
 - **software**: this repository.
+
+## Submission notes
+
+Errored out on "'ENSG00000288626' not found"
