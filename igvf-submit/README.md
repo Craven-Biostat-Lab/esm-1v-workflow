@@ -25,4 +25,8 @@ The predictions are organized in prediction sets grouped by gene.
 
 ## Submission notes
 
-Errored out on "'ENSG00000288626' not found"
+Attempt 1 on 2025-01-31:
+
+- File set table errored out on "'ENSG00000288626' not found"
+- Files table errored out on "Failed to POST mark-craven:esm1v-prediction-v1-ENSP00000502794.1"
+
