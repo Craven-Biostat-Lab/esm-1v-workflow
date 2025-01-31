@@ -41,8 +41,7 @@ def main():
     mapping_df = mapping_df[~mapping_df['Protein stable ID version'].isna()]
     gene_mapping = (
         mapping_df
-        .set_index('Protein stable ID version')['Gene stable ID version']
-        .str.extract(r'(ENSG[0-9]+)\.[0-9]+', expand=False)
+        .set_index('Protein stable ID version')['Gene stable ID']
     )
 
     common_fields = {
@@ -79,7 +78,7 @@ def main():
                 f'mark-craven:esm1v-mane-predictions-{gene_mapping[protein]}'
             )
             for _, f in zip(limiting_iterator, results_folder.iterdir())
-            for protein in (re.match(r'ENSP[0-9]+\.[0-9]', f.name)[0],)  # Using for on singleton to mimic "let"
+            for protein in (re.match(r'ENSP[0-9]+\.[0-9]+', f.name)[0],)  # Using for on singleton to mimic "let"
         ),
         columns=['aliases', 'submitted_file_name', 'description', 'md5sum', 'file_set']
     )
