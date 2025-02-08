@@ -33,7 +33,7 @@ The columns are as follows:
 
 ## Model information
 
-The code to run the prediction task, generate containers for running the computation, and process the results to produce the included tables can be found in [this GitHub repository](https://github.com/Craven-Biostat-Lab/esm-1v-workflow/tree/first-run).
+The code to run the prediction task, generate containers for running the computation, and process the results to produce the included tables can be found in [this GitHub repository](https://github.com/Craven-Biostat-Lab/esm-1v-workflow/).
 
 The trained models themselves that we used to generate the one-shot predictions downloadable here:
 [esm1v_t33_650M_UR90S_1](https://dl.fbaipublicfiles.com/fair-esm/models/esm1v_t33_650M_UR90S_1.pt),

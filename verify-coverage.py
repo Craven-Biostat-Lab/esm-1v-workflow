@@ -6,7 +6,7 @@ import gzip
 from pathlib import Path
 from Bio import SeqIO
 
-MANE_LIST = 'resources/MANE.GRCh38.v1.2.ensembl_protein.faa.gz'
+MANE_LIST = 'resources/MANE.GRCh38.v1.4.ensembl_protein.faa.gz'
 RESULT_DIR = 'results/processed-mane'
 
 reference_set = {
@@ -15,7 +15,7 @@ reference_set = {
 }
 
 result_set = {
-    file.stem
+    file.stem[:-4]
     for file in Path(RESULT_DIR).iterdir()
 }
 
