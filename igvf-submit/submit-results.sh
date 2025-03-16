@@ -12,7 +12,8 @@ confirm() {
     fi
 }
 
-MODE=prod
+#MODE=prod
+MODE=sandbox
 
 echo "Mode is $MODE"
 confirm Continue

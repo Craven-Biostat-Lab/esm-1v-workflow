@@ -1,0 +1,11 @@
+{
+    "lab": "mark-craven",
+    "award": "HG012039",
+    "aliases": ["mark-craven:esm1v-mane-predictions-file-v1"],
+    "description": "ESM-1v predictions for all single amino acid substitutions in all MANE protein sequences",
+    "content_type": "variant effects",
+    "controlled_access": false,
+    "file_format": "mark-craven:esm1v-mane-predictions-documentation-v1",
+    "file_set": "mark-craven:esm1v-mane-predictions-v1",
+    "md5sum": 0
+}

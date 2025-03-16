@@ -1,0 +1,19 @@
+name: igvf-utils-env
+channels:
+- defaults
+- conda-forge
+- nodefaults
+dependencies:
+- python
+- awscli
+- google-api-python-client
+- inflection
+- jsonschema
+- requests
+- urllib3
+- ipykernel
+- pandas
+- tqdm
+- pip
+- pip:
+  - https://github.com/IGVF-DACC/igvf_utils/archive/master.zip
