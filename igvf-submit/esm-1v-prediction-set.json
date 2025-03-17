@@ -1,9 +1,10 @@
 {
     "lab": "mark-craven",
     "award": "HG012039",
-    "file_set_type": "protein stability",
-    "aliases": ["mark-craven:esm1v-mane-predictions-v1"],
+    "file_set_type": "functional effect",
+    "aliases": ["mark-craven:esm1v-mane-predictions-v2"],
     "scope": "genome-wide",
     "description": "ESM-1v predictions for all single amino acid substitutions in all MANE protein sequences",
-    "documents": ["mark-craven:esm1v-mane-predictions-documentation-v1"]
+    "documents": ["mark-craven:esm1v-mane-predictions-documentation-v2"],
+    "donors": ["IGVFDO5469RVDJ"]
 }

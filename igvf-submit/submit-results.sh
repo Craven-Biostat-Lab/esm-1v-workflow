@@ -4,24 +4,21 @@
 # Must be done in an environment with igvf_utils installed
 # Must have the environment variables IGVF_API_KEY and IGVF_SECRET_KEY set.
 
-confirm() {
-    read -p "$1 (y/n): " response
-    if [[ "$response" != "y" ]]; then
-        echo "Exiting script."
-        exit 1
-    fi
+ask() {
+    read -p "$1 (y/n/a): " response
+    case "$response" in
+        [Yy]* ) return 0;;
+        [Aa]* ) echo "Abort received, exiting script."; exit 1;;
+        * ) return 1;;
+    esac
 }
 
 #MODE=prod
 MODE=sandbox
 
 echo "Mode is $MODE"
-confirm Continue
 
-# Submit documentation
-if false; then
-
-    confirm "Submit documentation?"
+if ask "Submit documentation?"; then
 
     iu_register.py \
         -m $MODE \
@@ -29,10 +26,7 @@ if false; then
         -i esm-1v-documentation.json
 fi
 
-# Submit software
-if false; then
-
-    confirm "Submit software?"
+if ask "Submit software?"; then
 
     iu_register.py \
         -m $MODE \
@@ -40,10 +34,7 @@ if false; then
         -i esm-1v-software.json
 fi
 
-# Submit software version
-if false; then
-
-    confirm "Submit software version?"
+if ask "Submit software version?"; then
 
     iu_register.py \
         -m $MODE \
@@ -51,10 +42,7 @@ if false; then
         -i esm-1v-software-version.json
 fi
 
-# Submit model set
-if false; then
-
-    confirm "Submit model set?"
+if ask "Submit model set?"; then
 
     iu_register.py \
         -m $MODE \
@@ -62,10 +50,7 @@ if false; then
         -i esm-1v-model-set.json
 fi
 
-# Submit model files
-if false; then
-
-    confirm "Submit model files?"
+if ask "Submit model files?"; then
 
     iu_register.py \
         -m $MODE \
@@ -73,26 +58,20 @@ if false; then
         -i esm-1v-model-files.json
 fi
 
-# Submit prediction sets
-if true; then
-
-    confirm "Submit prediction set?"
+if ask "Submit prediction set?"; then
 
     iu_register.py \
         -m $MODE \
         -p prediction_set \
-        -i esm-1v-fileset-metadata.txt
+        -i esm-1v-prediction-set.json
 fi
 
-# Submit prediction files
-if true; then
-
-    confirm "Submit prediction files?"
+if ask "Submit prediction files?"; then
 
     iu_register.py \
         -m $MODE \
         -p tabular_file \
-        -i esm-1v-files-metadata.txt
+        -i esm-1v-prediction-file.json
 fi
 
 echo "Done!"
