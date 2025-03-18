@@ -5,7 +5,7 @@
 # Must have the environment variables IGVF_API_KEY and IGVF_SECRET_KEY set.
 
 ask() {
-    read -p "$1 (y/n/a): " response
+    read -p "$1 (y/N/a): " response
     case "$response" in
         [Yy]* ) return 0;;
         [Aa]* ) echo "Abort received, exiting script."; exit 1;;
@@ -13,8 +13,8 @@ ask() {
     esac
 }
 
-#MODE=prod
-MODE=sandbox
+MODE=prod
+#MODE=sandbox
 
 echo "Mode is $MODE"
 
@@ -55,7 +55,32 @@ if ask "Submit model files?"; then
     iu_register.py \
         -m $MODE \
         -p model_file \
-        -i esm-1v-model-files.json
+        -i esm-1v-model-files.json \
+        --no-upload-file
+fi
+
+if ask "Submit workflow?"; then
+
+    iu_register.py \
+        -m $MODE \
+        -p workflow \
+        -i esm-1v-workflow.json
+fi
+
+if ask "Submit analysis step?"; then
+
+    iu_register.py \
+        -m $MODE \
+        -p analysis_step \
+        -i esm-1v-analysis-step.json
+fi
+
+if ask "Submit analysis step version?"; then
+
+    iu_register.py \
+        -m $MODE \
+        -p analysis_step_version \
+        -i esm-1v-analysis-step-version.json
 fi
 
 if ask "Submit prediction set?"; then
