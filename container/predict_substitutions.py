@@ -62,6 +62,17 @@ def create_parser():
         )
     )
 
+    parser.add_argument(
+        '--device',
+        type=str,
+        default='cuda',
+        help=(
+            'Device for execution, '
+            'default behavior is to try the default CUDA device and fall back to CPU if cuda is not available. '
+            'Specifying this parameter is needed to run on a specific device when multiple are available.'
+        )
+    )
+
     return parser
 
 
@@ -83,7 +94,7 @@ def chunk_sequences(seq_list):
     return chunk_list
 
 
-def run_wt_marginals_model(model_location, chunk_list, batch_size):
+def run_wt_marginals_model(model_location, chunk_list, batch_size, device):
 
     start_time = default_timer()
     print('Loading model')
@@ -93,11 +104,7 @@ def run_wt_marginals_model(model_location, chunk_list, batch_size):
 
     # Load model
     model, alphabet = pretrained.load_model_and_alphabet(model_location)
-    model.eval()
-
-    if torch.cuda.is_available():
-        model = model.cuda()
-        print("Transferred model to GPU")
+    model.eval().to(device)
 
     print(f'It took {default_timer() - start_time} seconds to load the model.')
 
@@ -114,7 +121,7 @@ def run_wt_marginals_model(model_location, chunk_list, batch_size):
 
         # Using the marginals scoring strategy
         with torch.no_grad():
-            token_probs = torch.log_softmax(model(batch_tokens.cuda())['logits'], dim=-1)
+            token_probs = torch.log_softmax(model(batch_tokens.to(device))['logits'], dim=-1)
 
         # Put results in a dataframe
         results.append(
@@ -169,7 +176,7 @@ def split_to_batches(chunks, batch_size):
     return result
 
 
-def run_masked_marginals_model(model_location, chunk_list, batch_size):
+def run_masked_marginals_model(model_location, chunk_list, batch_size, device):
 
     start_time = default_timer()
     print('Loading model')
@@ -179,11 +186,7 @@ def run_masked_marginals_model(model_location, chunk_list, batch_size):
 
     # Load model
     model, alphabet = pretrained.load_model_and_alphabet(model_location)
-    model.eval()
-
-    if torch.cuda.is_available():
-        model = model.cuda()
-        print("Transferred model to GPU")
+    model.eval().to(device)
 
     print(f'It took {default_timer() - start_time} seconds to load the model.')
 
@@ -199,11 +202,8 @@ def run_masked_marginals_model(model_location, chunk_list, batch_size):
         tokens_masked = torch.cat([
             mask_token_tensor(batch_tokens, alphabet, i)
             for i in range(start+1, end+1) # +1 because of the start token
-        ])
+        ]).to(device)
 
-        if torch.cuda.is_available():
-            tokens_masked = tokens_masked.cuda()
-        
         with torch.no_grad():
             token_probs = torch.log_softmax(model(tokens_masked)['logits'], dim=-1)
         
@@ -256,7 +256,7 @@ def main(args):
 
     # Produce results and collate:
     pd.concat([
-        run_model(model_location, chunk_list, args.batch_size)
+        run_model(model_location, chunk_list, args.batch_size, torch.device(args.device))
         for model_location in args.model_location
     ]).to_csv(args.results)
 
