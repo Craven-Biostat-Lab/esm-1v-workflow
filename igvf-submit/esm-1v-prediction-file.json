@@ -1,0 +1,13 @@
+{
+    "lab": "mark-craven",
+    "award": "HG012039",
+    "aliases": ["mark-craven:esm1v-mane-predictions-file-v2"],
+    "description": "ESM-1v predictions for all single amino acid substitutions in all MANE protein sequences",
+    "content_type": "coding variant effects",
+    "controlled_access": false,
+    "file_format": "tsv",
+    "file_format_specifications": ["mark-craven:esm1v-mane-predictions-documentation-v2"],
+    "file_set": "mark-craven:esm1v-mane-predictions-v2",
+    "md5sum": "0d2b295382e3fcc35e69098f45b880f2",
+    "submitted_file_name": "/scratch/yuriy/igvf-esm-1v-predictions.tsv.gz"
+}

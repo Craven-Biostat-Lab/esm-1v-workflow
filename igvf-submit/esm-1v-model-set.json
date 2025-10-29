@@ -1,0 +1,10 @@
+{
+    "lab": "mark-craven",
+    "award": "HG012039",
+    "file_set_type": "neural network",
+    "aliases": ["mark-craven:esm1v-model-set-v1"],
+    "model_name": "ESM-1v",
+    "model_version": "v1.0.0",
+    "prediction_objects": ["coding variants"],
+    "software_version": "mark-craven:esm1v-software-version-v1"
+}

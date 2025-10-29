@@ -1,7 +1,7 @@
 {
     "lab": "mark-craven",
     "award": "HG012039",
-    "aliases": ["mark-craven:esm1v-mane-predictions-documentation-v1"],
+    "aliases": ["mark-craven:esm1v-mane-predictions-documentation-v2"],
     "document_type": "file format specification",
     "description": "Documentation for ESM-1v predictions for all single amino acid substitutions in all MANE protein sequences",
     "attachment": {"path": "ESM-1v Predictions Documentation.pdf"}

@@ -1,17 +1,18 @@
 # ESM-1v predictions for all AA substitutions in all MANE proteins
 
 This prediction set contains ESM-1v one-shot protein function predictions for all amino acid (AA) substitutions in MANE proteins.
-Specifically, MANE version 1.2 ([link to AA sequence FASTA file](https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.2/MANE.GRCh38.v1.2.ensembl_protein.faa.gz)).
+Specifically, MANE version 1.2 ([link to AA sequence FASTA file](https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/release_1.2/MANE.GRCh38.v1.2.ensembl_protein.faa.gz)),
+filtered down to those sequences that appear in GENCODE v43 ([link to AA sequence FASTA file](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_43/gencode.v43.pc_translations.fa.gz))
 
 ## File format
 
-The predictions are provided as a collection of `.tsv` (tab-separated value) files, one file per unique Ensembl Peptide (ENSP) ID.
-Each file starts with a header row.
-Columns are expected but not guaranteed to appear in the order listed here.
-Refer to the header row for an accurate ordering of columns within a particular file.
+The first row of the file is the header row.
 The columns are as follows:
 
-* **HGVS**: A description of the AA change following the [HGVS](https://varnomen.hgvs.org/recommendations/protein/variant/substitution/) standard as closely as reasonable, specifically:
+* **GENCODE.v43.ENSG**: Ensembl gene ID
+* **GENCODE.v43.ENST**: Ensembl transcript ID
+* **GENCODE.v43.ENSP**: Ensembl peptide ID
+* **HGVS.p**: A description of the AA change following the [HGVS](https://varnomen.hgvs.org/recommendations/protein/variant/substitution/) standard as closely as reasonable, specifically:
     * Values in this column are a string of the form `{sequence}:p.{ref}{pos}{alt}`, e.g. `ENSP00000005226.7:p.Val772Ala` where
         * `{sequence}` is the ENSP ID of the protein (e.g. `ENSP00000005226.7`).
         * `{ref}` is the three-letter abbreviation of the AA that appears in the reference sequence at the substitution position (e.g. `Val`).
@@ -33,7 +34,7 @@ The columns are as follows:
 
 ## Model information
 
-The code to run the prediction task, generate containers for running the computation, and process the results to produce the included tables can be found in [this GitHub repository](https://github.com/Craven-Biostat-Lab/esm-1v-workflow/tree/first-run).
+The code to run the prediction task, generate containers for running the computation, and process the results to produce the included tables can be found in [this GitHub repository](https://github.com/Craven-Biostat-Lab/esm-1v-workflow/).
 
 The trained models themselves that we used to generate the one-shot predictions downloadable here:
 [esm1v_t33_650M_UR90S_1](https://dl.fbaipublicfiles.com/fair-esm/models/esm1v_t33_650M_UR90S_1.pt),

@@ -1,0 +1,11 @@
+{
+    "lab": "mark-craven",
+    "award": "HG012039",
+    "aliases": ["mark-craven:esm1v-analysis-step-v1"],
+    "title": "ESM-1v amino acid substitution scoring step",
+    "analysis_step_types": ["computational model prediction"],
+    "input_content_types": ["protein language model"],
+    "output_content_types": ["coding variant effects"],
+    "step_label": "esm-1v-substitution-scoring-step",
+    "workflow": "mark-craven:esm1v-wokflow-v1"
+}
