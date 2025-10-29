@@ -1,3 +1,10 @@
+---
+author: Yuriy Sverchkov
+title: ESM-1v predictions for all AA substitutions in all MANE proteins
+date: '2023-10-06'
+lang: en-US
+---
+
 # ESM-1v predictions for all AA substitutions in all MANE proteins
 
 This prediction set contains ESM-1v one-shot protein function predictions for all amino acid (AA) substitutions in MANE proteins.
